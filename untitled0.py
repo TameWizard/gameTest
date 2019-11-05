@@ -6,7 +6,6 @@ commands_spell = ["cast", 'spell', 'magic']
 commands_rest = ['rest', 'stand', 'heal']
 commands_move = ['south', 'north', 'east', 'west']
 
-death = False
 locations = []
 positions = []
 
@@ -19,6 +18,7 @@ def attack(attacker, defender):
         return True
     else:
         return False
+
 
 
 def summon():
@@ -34,30 +34,30 @@ def death(defender):
         defender.alive = False
 
 def move(command):
-        if command == "south":
-            if player.pos + 10 not in positions:
-                print('You are trying to cross the edge of the world')
-            else:
-                player.pos += 10
-        elif command == 'north':
-            if player.pos - 10 not in positions:
-                print('You are trying to cross the edge of the world')
-            else:
-                player.pos -= 10
-        elif command == 'east':
-            if player.pos + 1 not in positions:
-                print('You are trying to cross the edge of the world')
-            else:
-                player.pos += 1
-        elif command == 'west':
-            if player.pos - 1 not in positions:
-                print('You are trying to cross the edge of the world')
-            else:
-                player.pos -= 1
-        for i in locations:
-            if i.position == player.pos:
-                player.loc = i
-                print('You are in the', player.loc.name)
+    if command == "south":
+        if player.pos + 10 not in positions:
+            print('You are trying to cross the edge of the world')
+        else:
+            player.pos += 10
+    elif command == 'north':
+        if player.pos - 10 not in positions:
+            print('You are trying to cross the edge of the world')
+        else:
+            player.pos -= 10
+    elif command == 'east':
+        if player.pos + 1 not in positions:
+            print('You are trying to cross the edge of the world')
+        else:
+            player.pos += 1
+    elif command == 'west':
+        if player.pos - 1 not in positions:
+            print('You are trying to cross the edge of the world')
+        else:
+            player.pos -= 1
+    for i in locations:
+        if i.position == player.pos:
+            player.loc = i
+            print('You are in the', player.loc.name)
 
 class Character:
     def __init__(self, name, alive, loc, pos, hp, attack):
