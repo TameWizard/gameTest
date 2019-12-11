@@ -2,29 +2,21 @@ from random import randrange as rd
 
 commands_Qexit = ['exit', 'quit', 'qexit']
 commands_attack = ["attack", "strike", "swing"]
-commands_spell = ["cast", 'spell', 'magic']
-commands_rest = ['rest', 'stand', 'heal']
-commands_move = ['south', 'north', 'east', 'west']
+commands_rest = ['rest', 'wait', 'heal']
+commands_control = ['heel+', 'heel-', 'rotationR', 'rotationL', 'speed+', 'speed-']
 
 locations = []
 positions = []
 
 def attack(attacker, defender):
     if attacker.loc == defender.loc and defender.alive and attacker.alive == True:
-        print(attacker.name, "deal", rd(attacker.attack, attacker.attack + 5), "points of damage to", defender.name, "!")
-        defender.hp -= attacker.attack
+        dmg = rd(attacker.attack, attacker.attack + 5)
+        print(attacker.name, "deal", dmg, "points of damage to", defender.name, "!")
+        defender.hp -= dmg
         if defender.hp <= 0:
             death(defender)
+            defender.hp = 0
         return True
-    else:
-        return False
-
-
-
-def summon():
-    monster.loc = player.loc
-    monster.alive = True
-    monster.hp += 10
 
 def death(defender):
     if defender == player:
@@ -33,40 +25,46 @@ def death(defender):
         print(defender.name, "is dead")
         defender.alive = False
 
-def move(command):
-    if command == "south":
-        if player.pos + 10 not in positions:
-            print('You are trying to cross the edge of the world')
-        else:
-            player.pos += 10
-    elif command == 'north':
-        if player.pos - 10 not in positions:
-            print('You are trying to cross the edge of the world')
-        else:
-            player.pos -= 10
-    elif command == 'east':
-        if player.pos + 1 not in positions:
-            print('You are trying to cross the edge of the world')
-        else:
-            player.pos += 1
-    elif command == 'west':
-        if player.pos - 1 not in positions:
-            print('You are trying to cross the edge of the world')
-        else:
-            player.pos -= 1
-    for i in locations:
-        if i.position == player.pos:
-            player.loc = i
-            print('You are in the', player.loc.name)
+def control(command):
+    if command == "heel+":
+            player.alt_agl += 10
+    elif command == 'heel-':
+            player.alt_agl -= 10
+    elif command == 'rotationR':
+            player.rot += 10
+    elif command == 'rotationL':
+            player.rot -= 10
+    elif command == 'speed+':
+            player.speed -= 1
+    elif command == 'speed-':
+            player.speed -= 1
+            
+def move(Plane):
+    if Plane.speed > 0:
+        Plane.alt += Plane.alt_agl * Plane.speed
+        Plane.pos += Plane.rot * Plane.speed + Plane.speed
+        Plane.speed -= int(Plane.alt_agl / 10)
+    else:
+        Plane.speed = 0 # no negative number
+        Plane.alt_agl -= 10
+        Plane.speed -= int(Plane.alt_agl / 10)
 
-class Character:
-    def __init__(self, name, alive, loc, pos, hp, attack):
-        self.hp = hp
-        self.alive = alive
-        self.loc = loc
+class Plane:
+    def __init__(self, name, Engine, alt, pos, rot, alt_agl, speed, alive = True):
         self.name = name
-        self.attack = attack
+        self.alt = alt
         self.pos = pos
+        self.rot = rot
+        self.alt_agl = alt_agl
+        self.speed = speed
+        self.alive = True
+
+class Engine:
+    def __init__(self, name, power, fuel):
+        self.name = name
+        self.power = power
+        self.fuel = fuel
+        self.name = name
 
 class Location:
     def __init__(self, name, position):
@@ -74,6 +72,8 @@ class Location:
         self.position = position
         locations.append(self)
         positions.append(self.position)
+        
+Altitude = [0, 10, 20, 30, 40, 50]
 
 arena = Location("Arena", 11)
 far = Location("Far away place", 0)
@@ -81,36 +81,21 @@ forest = Location("Forest", 12)
 town = Location("Town", 21)
 dessert = Location("dessert", 22)
 
-player = Character("Player", True, arena, 11, 10, 5)
-monster = Character("Monster", True, arena, 11, 10, 5)
+player = Plane("Player", Engine('Type1', 100, 100), 10, 11, 0, 0, 1)
 
 def game():
     command = ""
-    input("Welcome, traveller!")
-    while player.alive == True:
+    input("Welcome, pilot!")
+    while player.alive:
         command = input("What do you do? ")
-        if command in commands_attack:
-            if attack(player, monster) == True:
-                attack(monster, player)
-            else:
-                print("No one to attack")
-        elif command in commands_spell:
-            print("You teleported the monster!")
-            monster.loc = far
+        if command in commands_control:
+            control(command)
+        elif command == 'look':
+            print('Your speed is ' + str(player.speed))
+            print('Your altitude is ' + str(player.alt))
+            print('Your coordinates is ' + str(player.pos))
         elif command in commands_rest:
-            if attack(monster, player) == False:
-                print("Get some rest")
-                player.hp += 2
-            else:
-                print('No time to rest')
-        elif command in commands_move:
-            move(command)
-        elif command == "look":
-            print("Your health is", player.hp, "and Monster health is", monster.hp)
-            print("You are in", player.loc.name)
-        elif command == "summon":
-            summon()
-            print("You have summoned a monster")
+            move(player)
         elif command in commands_Qexit:
             print("Your journey ends here.")
             return False
